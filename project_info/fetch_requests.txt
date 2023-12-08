@@ -1,0 +1,97 @@
+//Делаем GET запрос через консоль разработчика Google.
+
+fetch('http://localhost:3003/courses/', {method: 'GET'})
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 404) {
+                throw new Error('Course not found');
+            } else {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+        }
+        return res.json();
+    })
+    .then(json => console.log(json))
+    .catch(error => console.error('Error:', error.message));
+
+
+// Делаем GET запрос с query параметрами через консоль разработчика Google.
+fetch('http://localhost:3003/courses/?title=end', { method: 'GET' })
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 404) {
+                throw new Error('Course not found');
+            } else {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+        }
+        return res.json();
+    })
+    .then(json => console.log(json))
+    .catch(error => console.error('Error:', error.message));
+
+
+//Делаем POST запрос через консоль разработчика Google.
+
+fetch('http://localhost:3003/courses',
+    { method: 'POST',
+    body: JSON.stringify({title: "autumn"}),
+    headers: {
+        'content-type': 'application/json'
+    }})
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 404) {
+                throw new Error('Course not found');
+            } else {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+        }
+        return res.text();
+    })
+    .then(json => console.log(json))
+    .catch(error => console.error('Error:', error.message));
+
+
+// Делаем PUT запрос через консоль разработчика Google.
+
+fetch('http://localhost:3003/courses/1',
+    {
+        method: 'PUT',
+        body: JSON.stringify({ title: "updated title" }), // Замените на актуальные данные
+        headers: {
+            'content-type': 'application/json'
+        }
+    })
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 404) {
+                throw new Error('Course not found');
+            } else {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+        }
+        return res.text();
+    })
+    .then(json => console.log(json))
+    .catch(error => console.error('Error:', error.message));
+
+
+4)Делаем DELETE запрос через консоль разработчика Google.
+
+fetch('http://localhost:3003/courses/1',
+    {
+        method: 'DELETE'
+    })
+    .then(res => {
+        if (!res.ok) {
+            if (res.status === 404) {
+                throw new Error('Course not found');
+            } else {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+        }
+        return res.text();
+    })
+    .then(json => console.log(json))
+    .catch(error => console.error('Error:', error.message));
