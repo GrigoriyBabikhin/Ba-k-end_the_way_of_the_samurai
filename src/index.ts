@@ -93,6 +93,11 @@ app.put('/courses/:id', (req, res) => {
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 })
 
+app.delete('/__test__/data', (req, res) => {
+    db.courses = [];
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
