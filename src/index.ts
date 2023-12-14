@@ -3,7 +3,7 @@ import express from 'express'
 export const app = express()
 const port = 3003
 const jsonBodyMiddleware = express.json()
-const HTTP_STATUSES = {
+export const HTTP_STATUSES = {
     OK_200 : 200,
     CREATED_201: 201,
     NO_CONTENT_204: 204,
@@ -52,12 +52,14 @@ app.post('/courses', (req, res) => {
         return;
     }
 
-    const createCourses = {
+    const createdCourse = {
         id: Number(new Date()),
         title: req.body.title
     };
-    db.courses.push(createCourses)
-    res.sendStatus(HTTP_STATUSES.CREATED_201)
+    db.courses.push(createdCourse)
+    res
+        .status(HTTP_STATUSES.CREATED_201)
+        .json(createdCourse)
 })
 
 app.delete('/courses/:id', (req, res) => {
