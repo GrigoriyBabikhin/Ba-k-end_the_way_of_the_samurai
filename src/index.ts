@@ -1,4 +1,4 @@
-import express from 'express'
+import express, {Request, Response} from 'express'
 
 export const app = express()
 const port = 3003
@@ -13,7 +13,12 @@ export const HTTP_STATUSES = {
 
 app.use(jsonBodyMiddleware)
 
-const db = {
+type CourseType = {
+    id: number
+    title: string
+}
+
+const db: { courses: CourseType[]} = {
     courses: [
         {id: 1, title: 'front-end'},
         {id: 2, title: 'back-end'},
@@ -22,17 +27,19 @@ const db = {
     ]
 }
 
-app.get('/courses', (req, res) => {
-    let foundCourse = db.courses
+app.get('/courses', (req: Request<{},{},{},{title:string}>,
+                     res: Response<CourseType[]>) => {
+    let foundCourses = db.courses;
+
     if (req.query.title) {
-        foundCourse = foundCourse
-            .filter(c => c.title.indexOf(req.query.title as string) > -1)
+        foundCourses = foundCourses
+            .filter(c => c.title.indexOf(req.query.title) > -1)
     }
 
-    res.json(foundCourse)
+    res.json(foundCourses)
 })
 
-app.get('/courses/:id', (req, res) => {
+app.get('/courses/:id', (req: Request<{id: string}>, res) => {
     const coursesId = Number(req.params.id);
 
     const foundCourse = db.courses.find(c => c.id === coursesId);
@@ -44,7 +51,8 @@ app.get('/courses/:id', (req, res) => {
     res.json(foundCourse)
 })
 
-app.post('/courses', (req, res) => {
+app.post('/courses', (req: Request<{},{},{title: string}>,
+                      res: Response<CourseType>) => {
     const checkingForAnEmptyLine = !req.body.title || req.body.title.replace(/\s/g, '').length === 0;
 
     if (checkingForAnEmptyLine) {
@@ -62,7 +70,7 @@ app.post('/courses', (req, res) => {
         .json(createdCourse)
 })
 
-app.delete('/courses/:id', (req, res) => {
+app.delete('/courses/:id', (req: Request<{id: string}>, res) => {
     const coursesId = Number(req.params.id);
     const foundCourse = db.courses.find(c => c.id === coursesId);
     if (!foundCourse) {
@@ -75,7 +83,7 @@ app.delete('/courses/:id', (req, res) => {
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 })
 
-app.put('/courses/:id', (req, res) => {
+app.put('/courses/:id', (req: Request<{id: string},{},{title: string}>, res) => {
     const coursesId = Number(req.params.id);
     const foundCourse = db.courses.find(c => c.id === coursesId);
     const checkingForAnEmptyLine = !req.body.title || req.body.title.replace(/\s/g, '').length === 0
