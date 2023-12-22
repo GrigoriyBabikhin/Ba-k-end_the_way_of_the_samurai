@@ -18,7 +18,7 @@ type CourseType = {
     title: string
 }
 
-const db: { courses: CourseType[]} = {
+const db: { courses: CourseType[] } = {
     courses: [
         {id: 1, title: 'front-end'},
         {id: 2, title: 'back-end'},
@@ -27,7 +27,7 @@ const db: { courses: CourseType[]} = {
     ]
 }
 
-app.get('/courses', (req: Request<{},{},{},{title:string}>,
+app.get('/courses', (req: Request<{}, {}, {}, { title: string }>,
                      res: Response<CourseType[]>) => {
     let foundCourses = db.courses;
 
@@ -39,7 +39,7 @@ app.get('/courses', (req: Request<{},{},{},{title:string}>,
     res.json(foundCourses)
 })
 
-app.get('/courses/:id', (req: Request<{id: string}>, res) => {
+app.get('/courses/:id', (req: Request<{ id: string }>, res) => {
     const coursesId = Number(req.params.id);
 
     const foundCourse = db.courses.find(c => c.id === coursesId);
@@ -51,7 +51,7 @@ app.get('/courses/:id', (req: Request<{id: string}>, res) => {
     res.json(foundCourse)
 })
 
-app.post('/courses', (req: Request<{},{},{title: string}>,
+app.post('/courses', (req: Request<{}, {}, { title: string }>,
                       res: Response<CourseType>) => {
     const checkingForAnEmptyLine = !req.body.title || req.body.title.replace(/\s/g, '').length === 0;
 
@@ -70,7 +70,7 @@ app.post('/courses', (req: Request<{},{},{title: string}>,
         .json(createdCourse)
 })
 
-app.delete('/courses/:id', (req: Request<{id: string}>, res) => {
+app.delete('/courses/:id', (req: Request<{ id: string }>, res) => {
     const coursesId = Number(req.params.id);
     const foundCourse = db.courses.find(c => c.id === coursesId);
     if (!foundCourse) {
@@ -83,7 +83,7 @@ app.delete('/courses/:id', (req: Request<{id: string}>, res) => {
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 })
 
-app.put('/courses/:id', (req: Request<{id: string},{},{title: string}>, res) => {
+app.put('/courses/:id', (req: Request<{ id: string }, {}, { title: string }>, res) => {
     const coursesId = Number(req.params.id);
     const foundCourse = db.courses.find(c => c.id === coursesId);
     const checkingForAnEmptyLine = !req.body.title || req.body.title.replace(/\s/g, '').length === 0
