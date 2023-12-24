@@ -1,5 +1,7 @@
 import request from 'supertest'
 import {app, HTTP_STATUSES} from "../../src";
+import {CrateCourseModel} from "../../src/models/CrateCourseModel";
+import {UpdateCourseModel} from "../../src/models/UpdateCourseModel";
 
 describe('/course', () => {
     beforeAll(async () => {
@@ -19,9 +21,11 @@ describe('/course', () => {
     })
 
     it(`shouldn't create course with incorrect import data`, async () => {
+        const data: CrateCourseModel = {title: ''};
+
         await request(app)
             .post('/courses')
-            .send({title: ' '})
+            .send(data)
             .expect(HTTP_STATUSES.BAD_REQUEST_400)//если создаем невалидные данные получаем отказ.
 
         await request(app)
@@ -32,16 +36,18 @@ describe('/course', () => {
 
     let createdCourse1: any = null
     it(`shouldn create course with correct import data`, async () => {
+        const data: CrateCourseModel = {title: 'it-incubator course 1'};
+
         const createResponse = await request(app)
             .post('/courses')
-            .send({title: 'it-incubator course'})
+            .send(data)
             .expect(HTTP_STATUSES.CREATED_201)
 
         createdCourse1 = createResponse.body;
 
         expect(createdCourse1).toEqual({
             id: expect.any(Number),
-            title: 'it-incubator course'
+            title: data.title
         })
 
         await request(app)
@@ -51,16 +57,18 @@ describe('/course', () => {
 
     let createdCourse2: any = null;
     it(`create one more course`, async () => {
+        const data: CrateCourseModel = {title: 'it-incubator course 2'};
+
         const createResponse = await request(app)
             .post('/courses')
-            .send({title: 'it-incubator course 2'})
+            .send(data)
             .expect(HTTP_STATUSES.CREATED_201)
 
         createdCourse2 = createResponse.body;
 
         expect(createdCourse2).toEqual({
             id: expect.any(Number),
-            title: 'it-incubator course 2'
+            title: data.title
         })
 
         await request(app)
@@ -69,9 +77,11 @@ describe('/course', () => {
     })
 
     it(`shouldn't update course with incorrect import data`, async () => {
+        const data: UpdateCourseModel = {title: ''};
+
         await request(app)
             .put('/courses/' + createdCourse1.id)
-            .send({title: ''})
+            .send(data)
             .expect(HTTP_STATUSES.BAD_REQUEST_400)//невалидное обновление не пройдет
 
         await request(app)
@@ -80,24 +90,28 @@ describe('/course', () => {
     })
 
     it(`shouldn't update course that not exist`, async () => {
+        const data: UpdateCourseModel = {title: 'good title'}
+
         await request(app)
             .put('/courses/' + -100)
-            .send({title: 'good title'})
+            .send(data)
             .expect(HTTP_STATUSES.NOT_FOUND_404)
 
     })
 
     it(`should update course with correct input data`, async () => {
+        const data: UpdateCourseModel = {title: 'good new title'}
+
         await request(app)
             .put('/courses/' + createdCourse1.id)
-            .send({title: 'good new title'})
+            .send(data)
             .expect(HTTP_STATUSES.NO_CONTENT_204)
 
         await request(app)
             .get('/courses/' + createdCourse1.id)
             .expect(HTTP_STATUSES.OK_200, {
                 ...createdCourse1,
-                title: 'good new title'//проверяем что кус обновился
+                title: data.title//проверяем что кус обновился
             })
 
         await request(app)

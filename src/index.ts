@@ -1,4 +1,10 @@
-import express, {Request, Response} from 'express'
+import express, {Response} from 'express'
+import {RequestWithBody, RequestWithParams, RequestWithParamsAndBody, RequestWithQuery} from "./types";
+import {CrateCourseModel} from "./models/CrateCourseModel";
+import {UpdateCourseModel} from "./models/UpdateCourseModel";
+import {QueryCoursesModel} from "./models/QueryCoursesModel";
+import {CourseViewModel} from "./models/CourseViewModel";
+import {URIParamsCourseIdModel} from "./models/URIParamsCourseIdModel";
 
 export const app = express()
 const port = 3003
@@ -16,19 +22,28 @@ app.use(jsonBodyMiddleware)
 type CourseType = {
     id: number
     title: string
+    studentsCount: number
 }
 
 const db: { courses: CourseType[] } = {
     courses: [
-        {id: 1, title: 'front-end'},
-        {id: 2, title: 'back-end'},
-        {id: 3, title: 'automation qa'},
-        {id: 4, title: 'devops'}
+        {id: 1, title: 'front-end', studentsCount: 10},
+        {id: 2, title: 'back-end', studentsCount: 10},
+        {id: 3, title: 'automation qa', studentsCount: 10},
+        {id: 4, title: 'devops', studentsCount: 10}
     ]
 }
 
-app.get('/courses', (req: Request<{}, {}, {}, { title: string }>,
-                     res: Response<CourseType[]>) => {
+const getCourseViewModel = (dbCourse: CourseType): CourseViewModel => {
+    return {
+        id: dbCourse.id,
+        title: dbCourse.title
+    }
+
+}
+
+app.get('/courses', (req: RequestWithQuery<QueryCoursesModel>,
+                     res: Response<CourseViewModel[]>) => {
     let foundCourses = db.courses;
 
     if (req.query.title) {
@@ -36,10 +51,11 @@ app.get('/courses', (req: Request<{}, {}, {}, { title: string }>,
             .filter(c => c.title.indexOf(req.query.title) > -1)
     }
 
-    res.json(foundCourses)
+    res.json(foundCourses.map(getCourseViewModel))
 })
 
-app.get('/courses/:id', (req: Request<{ id: string }>, res) => {
+app.get('/courses/:id', (req: RequestWithParams<URIParamsCourseIdModel>,
+                         res: Response<CourseViewModel>) => {
     const coursesId = Number(req.params.id);
 
     const foundCourse = db.courses.find(c => c.id === coursesId);
@@ -48,11 +64,11 @@ app.get('/courses/:id', (req: Request<{ id: string }>, res) => {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         return
     }
-    res.json(foundCourse)
+    res.json(getCourseViewModel(foundCourse))
 })
 
-app.post('/courses', (req: Request<{}, {}, { title: string }>,
-                      res: Response<CourseType>) => {
+app.post('/courses', (req: RequestWithBody<CrateCourseModel>,
+                      res: Response<CourseViewModel>) => {
     const checkingForAnEmptyLine = !req.body.title || req.body.title.replace(/\s/g, '').length === 0;
 
     if (checkingForAnEmptyLine) {
@@ -60,17 +76,18 @@ app.post('/courses', (req: Request<{}, {}, { title: string }>,
         return;
     }
 
-    const createdCourse = {
+    const createdCourse: CourseType = {
         id: Number(new Date()),
-        title: req.body.title
+        title: req.body.title,
+        studentsCount: 0
     };
     db.courses.push(createdCourse)
     res
         .status(HTTP_STATUSES.CREATED_201)
-        .json(createdCourse)
+        .json(getCourseViewModel(createdCourse))
 })
 
-app.delete('/courses/:id', (req: Request<{ id: string }>, res) => {
+app.delete('/courses/:id', (req: RequestWithParams<URIParamsCourseIdModel>, res) => {
     const coursesId = Number(req.params.id);
     const foundCourse = db.courses.find(c => c.id === coursesId);
     if (!foundCourse) {
@@ -83,7 +100,8 @@ app.delete('/courses/:id', (req: Request<{ id: string }>, res) => {
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 })
 
-app.put('/courses/:id', (req: Request<{ id: string }, {}, { title: string }>, res) => {
+app.put('/courses/:id', (req: RequestWithParamsAndBody<URIParamsCourseIdModel, UpdateCourseModel>,
+                         res) => {
     const coursesId = Number(req.params.id);
     const foundCourse = db.courses.find(c => c.id === coursesId);
     const checkingForAnEmptyLine = !req.body.title || req.body.title.replace(/\s/g, '').length === 0
